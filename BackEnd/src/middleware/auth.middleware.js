@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken"
 import { db } from "../libs/db.js";
 
+// checks for login status of the user
 export const authmiddleware = async (req, res, next)=>{
     try {
         // console.log("Authmiddleware");
@@ -64,6 +65,7 @@ export const authmiddleware = async (req, res, next)=>{
     }
 }
 
+// check whether the user is admin or not
 export const checkAdmin = async(req, res, next)=>{
     try {
         const userId = req.user.id;

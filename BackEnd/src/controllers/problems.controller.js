@@ -14,8 +14,9 @@ export const createProblem = async(req, res)=>{
         })
     }
 
+    
     try {
-        console.log(req.body);
+        // console.log(req.body);
         
         for(const [language, solutionCode] of Object.entries(referenceSolution)){
             const languageId = getJudge0LanguageId(language)
@@ -43,7 +44,7 @@ export const createProblem = async(req, res)=>{
             for(let i=0; i<results.length; i++){
                 const result = results[i];
 
-                console.log("Result:------------",result);
+                // console.log("Result:------------",result);
                 
                 if(result.status.id!==3){
                     return res.status(400).json({
@@ -84,16 +85,101 @@ export const createProblem = async(req, res)=>{
 }
 
 
-export const getAllProblems = async(req, res)=>{}
+export const getAllProblems = async(req, res)=>{
+    try {
+        const problems = await db.problem.findMany();
+
+        if(!problems || problems.length===0){
+            return res.status(404).json({
+                message:"No any problems to display"
+            })
+        }
+
+        res.status(200).json({
+            success:true,
+            message:"Problems Feutched successfully",
+            problems
+        })
+    } catch (error) {
+        return res.status(500).json({
+            error:"Error while Ftching Problems"
+        })
+    }
+}
 
 
-export const getProblemById = async(req, res)=>{}
+export const getProblemById = async(req, res)=>{
+    const {id} = req.params;
+    // console.log(id);
+    
+    try {
+        const problem = await db.problem.findUnique({
+            where:{
+                id
+            }
+        })
+
+        if(!problem){
+            return res.status(404).json({
+                message:"Problem not found"
+            })
+        }
+
+        res.status(200).json({
+            success:true,
+            message:"Problem found successfully",
+            problem
+        })
+    } catch (error) {
+        return res.status(500).json({
+            error:"Error in fetching problem by their id"
+        })
+    }
+}
 
 
-export const updateProblem = async(req, res)=>{}
+export const updateProblem = async(req, res)=>{
+    // get id from req.params
+    // check for id, whether it is present or not
+    // same as createProblem controller, but sql query will be update{where id, and then data}
+}
 
 
-export const deleteProblem = async(req, res)=>{}
+export const deleteProblem = async(req, res)=>{
+    const {id} = req.params;
+
+    try {
+        const problem = await db.problem.findUnique({
+            where:{
+                id
+            }
+        })
+    
+        if(!problem){
+            return res.status(404).json({
+                message:"Problem not found"
+            })
+        }
+
+        await db.problem.delete({
+            where:{
+                id
+            }
+        })
+
+        res.status(200).json({
+            success:true,
+            message:"Problem deleted successfully"
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:"Error while deleting problem",
+            error
+        })
+    }
+}
 
 
 export const getAllProblemsSolvedByUser = async(req, res)=>{}
