@@ -30,7 +30,9 @@ model User {
   updatedAt DateTime @updatedAt
 
   // establishing relationship with Problem
-  problems Problem[] // creating one to many reletion
+  problems      Problem[] // creating one to many reletion
+  submissions   Submission[]
+  problemsolved ProblemSolved[]
 }
 
 enum Difficulty {
@@ -59,4 +61,67 @@ model Problem {
 
   // relation
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  submission Submission[]
+  solvedBy   ProblemSolved[]
+}
+
+model Submission {
+  id            String  @id @default(uuid())
+  userId        String
+  problemId     String
+  sourceCode    Json
+  language      String
+  stdin         String?
+  stdout        String?
+  stderr        String?
+  compileOutput String?
+  status        String
+  memory        String?
+  time          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  testcases TestcaseResult[]
+}
+
+model TestcaseResult {
+  id            String  @id @default(uuid())
+  submissionId  String
+  testcase      Int
+  passed        Boolean
+  stdout        String?
+  expected      String
+  stderr        String?
+  compileOutput String?
+  status        String
+  memory        String?
+  time          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId]) // to create an index in submissionId field
+}
+
+model ProblemSolved {
+  id        String @id @default(uuid())
+  userId    String
+  problemId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, problemId])
 }
