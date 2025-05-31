@@ -182,4 +182,38 @@ export const deleteProblem = async(req, res)=>{
 }
 
 
-export const getAllProblemsSolvedByUser = async(req, res)=>{}
+export const getAllProblemsSolvedByUser = async(req, res)=>{
+    try {
+        const userId=req.user.id;
+        const problems = await db.problem.findMany({
+            where:{
+                solvedBy:{
+                    // where solvedBy field is checks with the currently logged-in user
+                    some:{
+                        userId
+                    }
+                }
+            },
+            include:{
+                solvedBy:{
+                    where:{
+                        userId
+                    }
+                }
+            }
+        })
+
+        res.status(200).json({
+            success:true,
+            message:"Fetched all problems solved by the user",
+            problems
+        })
+    } catch (error) {
+        console.log(error);
+        
+        return res.status(500).json({
+            success:false,
+            error:"Failed to fetch the problems"
+        })
+    }
+}
