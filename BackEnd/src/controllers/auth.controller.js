@@ -133,7 +133,7 @@ export const login = async(req, res)=>{
         console.log("Error Logging user: ", error);
 
         res.status(500).json({
-            error: "Error creating user"
+            error: "Error Logging user"
         })
     }
 }
