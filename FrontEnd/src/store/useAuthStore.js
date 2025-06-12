@@ -19,7 +19,8 @@ export const useAuthStore = create( (set)=>({
 
             console.log("CheckAuth Response:", res.data);
             
-            // set({authUser:res.data.user}) // user from backend check response
+            set({authUser:res.data.user}) // user from backend check response
+            
         } catch (error) {
             console.log("Error checking auth:", error);
             set( {authUser:null} )
