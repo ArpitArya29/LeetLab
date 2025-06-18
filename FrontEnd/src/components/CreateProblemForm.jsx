@@ -127,7 +127,6 @@ const CreateProblemForm = () => {
 
   const onSubmit = async (value) => {
     console.log(value);
-    // console.log(typeof value.testcases[0].input);
 
     try {
       setIsLoading(true);
