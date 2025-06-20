@@ -1,7 +1,7 @@
 import { db } from "../libs/db.js";
 import { getLanguageName, pollBatchResults, submitBatch } from "../libs/judge0.lib.js";
 
-export const executeCode = async (req,res)=>{
+export const submitCode = async (req,res)=>{
     try {
         const {source_code, language_id, stdin, expected_outputs, problemId} = req.body;
     
@@ -157,6 +157,78 @@ export const executeCode = async (req,res)=>{
         return res.status(500).json({
             success:false,
             message:"Error while executing testcases",
+            error
+        })
+    }
+}
+
+
+export const runCode = async(req, res) =>{
+    try {
+        const { source_code, language_id, stdin, expected_outputs, problemId} = req.body;
+
+        // validate test cases
+        if(!Array.isArray(stdin) || stdin.length==0 || !Array.isArray(expected_outputs) || expected_outputs.length==0){
+            return res.status(400).json({
+                message: "Invalid or Missing test cases"
+            })
+        }
+
+        // prepare each testcase for judge0 batch submission
+        const submissions = stdin.map( (input)=>({
+            source_code,
+            language_id,
+            stdin:input,
+        }))
+
+        // send this batch submission to judge0
+        const submitResponse = await submitBatch(submissions);
+
+        const tokens = submitResponse.map( (res)=> res.token);
+
+        const results = await pollBatchResults(tokens);
+
+
+        // checking for all passed
+        let allPassed = true;
+
+        const detailedResults = results.map( (result, i)=>{
+            const ret_output = result.stdout.trim();
+
+            const expected_output = expected_outputs[i].trim();
+
+            const passed = ret_output===expected_output;
+
+            if(!passed) allPassed = false;
+
+            return{
+                testCase:i+1,
+                passed,
+                stdout:ret_output,
+                expected:expected_output,
+                stderr:result.error || null,
+                compileOutput:result.compile_output || null,
+                status:result.status.description,
+                memory:result.memory?`${result.memory} KB` : undefined,
+                time:result.time?`${result.time} s` : undefined
+            }
+        })
+
+        console.log("Detailed results");
+        
+        console.log(detailedResults);
+        
+        res.status(200).json({
+            success:true,
+            message:"Testcase executed",
+            executeResult:detailedResults,
+            results
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:"Error in executing testcases",
             error
         })
     }

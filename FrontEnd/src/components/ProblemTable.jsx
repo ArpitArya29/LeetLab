@@ -165,7 +165,10 @@ const ProblemTable = ({ problems }) => {
                           // >
                           //   {tag}
                           // </span>
-                          <span class="badge text-white bg-gradient-to-r from-purple-600 to-indigo-800">
+                          <span
+                            key={idx}
+                            className="badge text-white bg-gradient-to-r from-purple-600 to-indigo-800"
+                          >
                             {tag}
                           </span>
                         ))}
