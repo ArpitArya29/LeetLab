@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
 import { useAuthStore } from "../store/useAuthStore";
-import { Link } from "react-router-dom";
+import { useActions } from "../store/useAction";
 
 import {
   Bookmark,
@@ -10,10 +12,13 @@ import {
   Plus,
   ArrowLeft,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
 
 const ProblemTable = ({ problems }) => {
+
   const { authUser } = useAuthStore();
+  const { isDeletingProblem, deleteProblem } = useActions();
 
   const [search, setSearch] = useState("");
   const [difficulty, setDifficulty] = useState("ALL");
@@ -58,7 +63,14 @@ const ProblemTable = ({ problems }) => {
   }, [filteredProblems, currentPage]);
 
   const handleDelete = (id) => {
-    console.log(id, " Problem deleted");
+
+    const isConfirmed = window.confirm("Are you sore to delete problem?");
+
+    if(isConfirmed){
+      console.log(id, " Problem deleted");
+      deleteProblem(id);
+    }
+
   };
 
   const handleSaveToPlaylist = (id) => {
@@ -198,7 +210,11 @@ const ProblemTable = ({ problems }) => {
                               onClick={() => handleDelete(problem.id)}
                               className="btn btn-sm btn-error"
                             >
-                              <TrashIcon className="w-4 h-4 text-white" />
+                              {isDeletingProblem ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <TrashIcon className="w-4 h-4 text-white" />
+                              )}
                             </button>
                             <button disabled className="btn btn-sm btn-warning">
                               <PencilIcon className="w-4 h-4 text-white" />

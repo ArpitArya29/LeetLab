@@ -4,6 +4,7 @@ import { useProblemStore } from "../store/useProblemStore";
 import { Loader } from "lucide-react";
 
 import ProblemTable from "../components/ProblemTable";
+import { useActions } from "../store/useAction";
 
 const HomePage = () => {
   const { problems, getAllProblems, isProblemsLoading } = useProblemStore();
