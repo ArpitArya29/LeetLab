@@ -22,11 +22,26 @@ import {
 } from "lucide-react";
 
 import { useProblemStore } from "../store/useProblemStore";
+import { useExecutionStore } from "../store/useExecutionStore";
+import { useSubmissionStore } from "../store/useSubmissionStore";
+import { getlanguageId } from "../lib/lang";
+
+import SubmissionResult from "../components/Submission";
+import SubmissionList from "../components/submissionList";
 
 const ProblemPage = () => {
   const { id } = useParams();
 
-  const { getProblemById, problem, isProblemLoading } = useProblemStore();
+  const { problem, getProblemById, isProblemLoading } = useProblemStore();
+  const { isRunning, isSubmitting, submission, runCode, submitCode } =
+    useExecutionStore();
+  const {
+    isLoading,
+    submission: submissions,
+    getSubmissionForProblem,
+    getSubmissionCountForProblem,
+    submissionCount,
+  } = useSubmissionStore();
 
   const [code, setCode] = useState("");
   const [activeTab, setActiveTab] = useState("description");
@@ -34,11 +49,11 @@ const ProblemPage = () => {
   const [Bookmarked, setBookmarked] = useState(false);
   const [testCases, setTestCases] = useState([]);
 
-  const submissionCount = 10;
-  const isExecuting = false;
+  // const submissionCount = 10;
 
   useEffect(() => {
     getProblemById(id);
+    getSubmissionCountForProblem(id);
   }, [id]);
 
   useEffect(() => {
@@ -54,16 +69,47 @@ const ProblemPage = () => {
     }
   }, [problem, selectedLanguage]);
 
+  useEffect(() => {
+    if (activeTab === "submissions" && id) {
+      getSubmissionForProblem(id);
+    }
+  }, [activeTab, id]);
+
+  console.log("Submissions:", submissions);
+
   const handleLanguageChange = (e) => {
     const lang = e.target.value;
     setSelectedlanguage(lang);
     setCode(problem.codeSnippet?.[lang] || "");
   };
 
-  const handleRunCode = ()=>{
-    console.log("Running");
-    
-  }
+  const handleSubmitCode = (e) => {
+    console.log("submitting...");
+    e.preventDefault();
+
+    try {
+      const languade_id = getlanguageId(selectedLanguage);
+      const stdin = problem.testcases.map((tc) => tc.input);
+      const expected_output = problem.testcases.map((tc) => tc.output);
+      submitCode(code, languade_id, stdin, expected_output, id);
+    } catch (error) {
+      console.log("Error executing code", error);
+    }
+  };
+
+  const handleRunCode = (e) => {
+    console.log("running...");
+    e.preventDefault();
+
+    try {
+      const languade_id = getlanguageId(selectedLanguage);
+      const stdin = problem.testcases.map((tc) => tc.input);
+      const expected_output = problem.testcases.map((tc) => tc.output);
+      runCode(code, languade_id, stdin, expected_output, id);
+    } catch (error) {
+      console.log("Error executing code", error);
+    }
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -128,13 +174,11 @@ const ProblemPage = () => {
 
       case "submissions":
         return (
-          <h1 className="p-4 text-center text-base-content/70">
-            Your Submissions here
-          </h1>
-          // <SubmissionList
-          //   submissions={submissions}
-          //   isLoading={isSubmissionLoading}
-          // />
+          <div className="card bg-base-100 shadow-xl mt-6">
+            
+            <SubmissionList submissions={submissions} isLoading={isLoading} />
+          </div>
+          
         );
 
       case "discussion":
@@ -160,6 +204,7 @@ const ProblemPage = () => {
             )}
           </div>
         );
+
       default:
         return null;
     }
@@ -174,7 +219,7 @@ const ProblemPage = () => {
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-base-300 to-base-200">
+    <div className="min-h-screen bg-gradient-to-br from-base-300 to-base-200 w-full">
       <nav className="navbar bg-base-100 shadow-lg px-4">
         <div className="flex-1 gap-2">
           <Link to={"/"} className="flex items-center gap=2 text-primary">
@@ -231,7 +276,7 @@ const ProblemPage = () => {
       </nav>
 
       <div className="container mx-auto p-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-screen">
           <div className="card bg-base-100 shadow-xl">
             <div className="card-body p-0">
               <div className="tabs tabs-bordered">
@@ -272,6 +317,17 @@ const ProblemPage = () => {
                   <Lightbulb className="w-4 h-4" />
                   Hints
                 </button>
+
+                {/* {submission && (
+                  <button
+                    className={`tab gap-2 ${
+                      activeTab === "submission" ? "tab-active" : ""
+                    }`}
+                    onClick={() => setActiveTab("submission")}
+                  >
+                    Submissions
+                  </button>
+                )} */}
               </div>
 
               <div className="p-6">{renderTabContent()}</div>
@@ -309,23 +365,63 @@ const ProblemPage = () => {
               </div>
 
               <div className="p-4 border-t border-base-300 bg-base-200">
-                  <div className="flex justify-between items-center">
-                    <button className={`btn btn-primary gap-2 ${isExecuting?'loading':''}`}
-                      onClick={handleRunCode}
-                      disabled={isExecuting}
-                    >
-                      {!isExecuting && <Play className="h-4 h-4"/>}
-                        Run Code
-                    </button>
+                <div className="flex justify-between items-center">
+                  <button
+                    className={`btn btn-primary gap-2 ${
+                      isRunning ? "loading" : ""
+                    }`}
+                    disabled={isRunning}
+                    onClick={handleRunCode}
+                  >
+                    {!isRunning && <Play className="h-4 w-4" />}
+                    Run Code
+                  </button>
 
-                    <button className="btn btn-success gap-2">
-                      Submit
-                    </button>
-                  </div>
+                  <button
+                    className={`btn btn-primary gap-2 ${
+                      isSubmitting ? "loading" : ""
+                    }`}
+                    disabled={isSubmitting}
+                    onClick={handleSubmitCode}
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+              <div className="card bg-base-100 shadow-xl mt-6">
+                <div className="card-body">
+                  {submission ? (
+                    <SubmissionResult submission={submission} />
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-xl font-bold">Test Cases</h3>
+                      </div>
+
+                      <div className="overflow-x-auto ">
+                        <table className="table table-zebra w-full">
+                          <thead>
+                            <tr>
+                              <th>Input</th>
+                              <th>Expected Output</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {testCases.map((testcase, index) => (
+                              <tr key={index}>
+                                <td className="font-mono">{testcase.input}</td>
+                                <td className="font-mono">{testcase.output}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>

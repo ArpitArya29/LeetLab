@@ -165,7 +165,7 @@ export const submitCode = async (req,res)=>{
 
 export const runCode = async(req, res) =>{
     try {
-        const { source_code, language_id, stdin, expected_outputs, problemId} = req.body;
+        const { source_code, language_id, stdin, expected_outputs } = req.body;
 
         // validate test cases
         if(!Array.isArray(stdin) || stdin.length==0 || !Array.isArray(expected_outputs) || expected_outputs.length==0){
@@ -210,18 +210,46 @@ export const runCode = async(req, res) =>{
                 compileOutput:result.compile_output || null,
                 status:result.status.description,
                 memory:result.memory?`${result.memory} KB` : undefined,
-                time:result.time?`${result.time} s` : undefined
+                time:result.time?`${result.time} s` : undefined,
             }
         })
+
+        // detailedResults.overallStatus=allPassed?"Accepted":"Wrong Answer"
 
         console.log("Detailed results");
         
         console.log(detailedResults);
+
+        const testCaseResults = {
+            sourceCode:source_code,
+            language:getLanguageName(language_id),
+            stdin:stdin.join("\n"),
+            stdout:JSON.stringify(detailedResults.map( (r)=>r.stdout)),
+            stderr:detailedResults.some( (r)=>r.stderr )
+            ? JSON.stringify(detailedResults.map( (r)=>r.stderr))
+            : null,
+            compileOutput:detailedResults.some( (r)=>r.compile_output )
+            ? JSON.stringify(detailedResults.map( (r)=>r.compile_output))
+            : null,
+            status: allPassed? "Accepted" : "Wrong Answer",
+            memory:detailedResults.some( (r)=>r.memory )
+            ? JSON.stringify(detailedResults.map( (r)=>r.memory))
+            : null,
+            time:detailedResults.some( (r)=>r.time )
+            ? JSON.stringify(detailedResults.map( (r)=>r.time))
+            : null,
+            testcases: detailedResults
+        }
+
+        console.log("testcase results");
+        
+        console.log(testCaseResults);
+        
         
         res.status(200).json({
             success:true,
             message:"Testcase executed",
-            executeResult:detailedResults,
+            executeResult:testCaseResults,
             results
         })
 
