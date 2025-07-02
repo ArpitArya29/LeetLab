@@ -121,6 +121,7 @@ export const addProblemToPlaylist = async(req, res) =>{
         const {playlistId} = req.params;
 
         const {problemIds} = req.body;
+        
 
         if(!Array.isArray(problemIds) || problemIds.length===0){
             return res.status(422).json({
@@ -140,7 +141,7 @@ export const addProblemToPlaylist = async(req, res) =>{
             const existingProblemList = existingProblems.map( (p)=> p.problemId);
 
             return res.status(409).json({
-                error:"Some Problem already exist in playlist",
+                message:"Some Problem already exist in playlist",
                 conflictCount:existingProblemList.length,
                 existingProblemList
             })

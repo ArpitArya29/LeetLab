@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { useAuthStore } from "../store/useAuthStore";
 import { useActions } from "../store/useAction";
+import { usePlaylistStore } from "../store/usePlaylistStore";
 
 import {
   Bookmark,
@@ -14,16 +15,22 @@ import {
   ArrowRight,
   Loader2,
 } from "lucide-react";
+import CreatePlaylistModel from "./CreatePlaylistModel";
+import AddToPlaylistModel from "./AddToPlaylistModel";
 
 const ProblemTable = ({ problems }) => {
-
   const { authUser } = useAuthStore();
   const { isDeletingProblem, deleteProblem } = useActions();
+  const { createPlaylist } = usePlaylistStore();
 
   const [search, setSearch] = useState("");
   const [difficulty, setDifficulty] = useState("ALL");
   const [selectedTag, setSelectedtag] = useState("ALL");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isCreateModelOpen, setIsCreateModelOpen] = useState(false);
+  const [isAddToPlaylistModelOpen, setIsAddToPlaylistModelOpen] =
+    useState(false);
+  const [selectedProblemId, setSelectedPrblemId] = useState(null)
 
   const difficulties = ["EASY", "MEDIUM", "HARD"];
 
@@ -63,18 +70,24 @@ const ProblemTable = ({ problems }) => {
   }, [filteredProblems, currentPage]);
 
   const handleDelete = (id) => {
-
     const isConfirmed = window.confirm("Are you sore to delete problem?");
 
-    if(isConfirmed){
+    if (isConfirmed) {
       console.log(id, " Problem deleted");
       deleteProblem(id);
     }
-
   };
 
-  const handleSaveToPlaylist = (id) => {
-    console.log(id, " Problem saved to playlist");
+  const handleSaveToPlaylist = (problemId) => {
+    console.log(problemId, " Problem saved to playlist");
+    setSelectedPrblemId(problemId);
+    setIsAddToPlaylistModelOpen(true);
+    // console.log(selectedProblemId);
+    
+  };
+
+  const handleCreatePlaylist = async (data) => {
+    await createPlaylist(data);
   };
 
   return (
@@ -82,7 +95,12 @@ const ProblemTable = ({ problems }) => {
       {/* Create Playlist section */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Problems</h2>
-        <button className="btn btn-primary gap-2" onClick={() => {}}>
+        <button
+          className="btn btn-primary gap-2"
+          onClick={() => {
+            setIsCreateModelOpen(true);
+          }}
+        >
           <Plus className="w-4 h-4" />
           Create PlayList
         </button>
@@ -268,6 +286,18 @@ const ProblemTable = ({ problems }) => {
           Next <ArrowRight className="w-4 h-4" />
         </button>
       </div>
+
+      <CreatePlaylistModel
+        isOpen={isCreateModelOpen}
+        onClose={() => setIsCreateModelOpen(false)}
+        onSubmit={handleCreatePlaylist}
+      />
+
+      <AddToPlaylistModel
+        isOpen={isAddToPlaylistModelOpen}
+        onClose={() => setIsAddToPlaylistModelOpen(false)}
+        problemId={selectedProblemId}
+      />
     </div>
   );
 };
