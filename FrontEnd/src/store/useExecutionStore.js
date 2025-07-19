@@ -7,10 +7,11 @@ export const useExecutionStore = create( (set)=>({
     isRunning:false,
     isSubmitting:false,
     submission:null,
+    compileError:null,
 
     runCode:async( source_code, language_id, stdin, expected_outputs, problemId)=>{
         try {
-            set({isRunning:true});
+            set({isRunning:true, compileError:null, submission:null});
 
             const res = await axiosInstance.post("/execute-code/run", {source_code, language_id, stdin, expected_outputs, problemId});
 
@@ -20,6 +21,7 @@ export const useExecutionStore = create( (set)=>({
 
         } catch (error) {
             console.log("Error executing code", error);
+            set({compileError:error.response.data});
             toast.error("Error executing code");
         }
         finally{

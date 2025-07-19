@@ -28,13 +28,20 @@ import { getlanguageId } from "../lib/lang";
 
 import SubmissionResult from "../components/Submission";
 import SubmissionList from "../components/submissionList";
+import ShowCompileError from "../components/ShowCompileError";
 
 const ProblemPage = () => {
   const { id } = useParams();
 
   const { problem, getProblemById, isProblemLoading } = useProblemStore();
-  const { isRunning, isSubmitting, submission, runCode, submitCode } =
-    useExecutionStore();
+  const {
+    isRunning,
+    isSubmitting,
+    submission,
+    compileError,
+    runCode,
+    submitCode,
+  } = useExecutionStore();
   const {
     isLoading,
     submission: submissions,
@@ -75,7 +82,7 @@ const ProblemPage = () => {
     }
   }, [activeTab, id]);
 
-  console.log("Submissions:", submissions);
+  // console.log("Submissions:", submissions);
 
   const handleLanguageChange = (e) => {
     const lang = e.target.value;
@@ -109,6 +116,8 @@ const ProblemPage = () => {
     } catch (error) {
       console.log("Error executing code", error);
     }
+
+    console.log(compileError);
   };
 
   const renderTabContent = () => {
@@ -175,10 +184,8 @@ const ProblemPage = () => {
       case "submissions":
         return (
           <div className="card bg-base-100 shadow-xl mt-6">
-            
             <SubmissionList submissions={submissions} isLoading={isLoading} />
           </div>
-          
         );
 
       case "discussion":
@@ -390,7 +397,12 @@ const ProblemPage = () => {
               </div>
               <div className="card bg-base-100 shadow-xl mt-6">
                 <div className="card-body">
-                  {submission ? (
+                  {compileError ? (
+                    <ShowCompileError
+                      givenInput={testCases[compileError.index].input}
+                      compileOutput={compileError.output}
+                    />
+                  ) : submission ? (
                     <SubmissionResult submission={submission} />
                   ) : (
                     <>

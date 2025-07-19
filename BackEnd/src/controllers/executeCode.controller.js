@@ -193,6 +193,16 @@ export const runCode = async(req, res) =>{
         let allPassed = true;
 
         const detailedResults = results.map( (result, i)=>{
+
+            const statusId = result.status.id;
+            if(statusId==6){
+                return{
+                    error:true,
+                    index:i,
+                    error_output:result.compile_output
+                }
+            }
+
             const ret_output = result.stdout.trim();
 
             const expected_output = expected_outputs[i].trim();
@@ -202,6 +212,7 @@ export const runCode = async(req, res) =>{
             if(!passed) allPassed = false;
 
             return{
+                error:false,
                 testCase:i+1,
                 passed,
                 stdout:ret_output,
@@ -214,11 +225,17 @@ export const runCode = async(req, res) =>{
             }
         })
 
-        // detailedResults.overallStatus=allPassed?"Accepted":"Wrong Answer"
+        const compileError = detailedResults.find(r=>r.error)
+        if (compileError) {
+            return res.status(422).json({
+                success: false,
+                message: "Compilation Failed",
+                index: compileError.index,
+                output: compileError.error_output
+            });
+        }
 
-        console.log("Detailed results");
-        
-        console.log(detailedResults);
+        // detailedResults.overallStatus=allPassed?"Accepted":"Wrong Answer"
 
         const testCaseResults = {
             sourceCode:source_code,
@@ -240,10 +257,6 @@ export const runCode = async(req, res) =>{
             : null,
             testcases: detailedResults
         }
-
-        console.log("testcase results");
-        
-        console.log(testCaseResults);
         
         
         res.status(200).json({
@@ -254,6 +267,8 @@ export const runCode = async(req, res) =>{
         })
 
     } catch (error) {
+        console.log(error);
+        
         return res.status(500).json({
             success:false,
             message:"Error in executing testcases",
