@@ -191,19 +191,23 @@ export const runCode = async(req, res) =>{
 
         // checking for all passed
         let allPassed = true;
+        console.log(results);
+        
 
         const detailedResults = results.map( (result, i)=>{
 
             const statusId = result.status.id;
-            if(statusId==6){
+            if(statusId==6 || statusId==11){
                 return{
                     error:true,
                     index:i,
-                    error_output:result.compile_output
+                    error_output:result.compile_output,
+                    stderr:result.stderr,
+                    statusId
                 }
             }
 
-            const ret_output = result.stdout.trim();
+            const ret_output = result.stdout?.trim();
 
             const expected_output = expected_outputs[i].trim();
 
@@ -226,12 +230,15 @@ export const runCode = async(req, res) =>{
         })
 
         const compileError = detailedResults.find(r=>r.error)
+        
         if (compileError) {
             return res.status(422).json({
                 success: false,
                 message: "Compilation Failed",
                 index: compileError.index,
-                output: compileError.error_output
+                output: compileError.error_output,
+                statusId:compileError.statusId,
+                stderr:compileError.stderr
             });
         }
 

@@ -12,9 +12,6 @@ const SubmissionResult = ({ submission }) => {
   const memoryArr = JSON.parse(submission.memory || []);
   const timeArr = JSON.parse(submission.time || []);
 
-  console.log(memoryArr);
-  console.log(submission.testcases);
-
   const avgMemory =
     memoryArr.map((m) => parseFloat(m)).reduce((a, b) => a + b, 0) /
     memoryArr.length;

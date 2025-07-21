@@ -91,7 +91,6 @@ const ProblemPage = () => {
   };
 
   const handleSubmitCode = (e) => {
-    console.log("submitting...");
     e.preventDefault();
 
     try {
@@ -105,7 +104,6 @@ const ProblemPage = () => {
   };
 
   const handleRunCode = (e) => {
-    console.log("running...");
     e.preventDefault();
 
     try {
@@ -116,8 +114,6 @@ const ProblemPage = () => {
     } catch (error) {
       console.log("Error executing code", error);
     }
-
-    console.log(compileError);
   };
 
   const renderTabContent = () => {
@@ -399,8 +395,8 @@ const ProblemPage = () => {
                 <div className="card-body">
                   {compileError ? (
                     <ShowCompileError
-                      givenInput={testCases[compileError.index].input}
-                      compileOutput={compileError.output}
+                      givenInput={testCases[compileError.index]?.input}
+                      compileOutputRes={compileError}
                     />
                   ) : submission ? (
                     <SubmissionResult submission={submission} />
