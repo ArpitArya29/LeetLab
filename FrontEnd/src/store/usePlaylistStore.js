@@ -51,7 +51,7 @@ export const usePlaylistStore = create( (set, get) =>({
 
             const res = await axiosInstance.get(`/playlist/${playlistId}`);
 
-            set( {currentPlaylist:res.data.playlist} );
+            set( {currentPlaylist:res.data.playList} );
 
         } catch (error) {
             console.log("Error fetching playlist details", error);
@@ -84,7 +84,9 @@ export const usePlaylistStore = create( (set, get) =>({
     removeProblemFromPlaylist: async(playlistId, problemIds) =>{
         try {
             set( {isLoading:true} );
-            await axiosInstance.post(`playlist/${playlistId}/remove-problem`, {problemIds});
+            await axiosInstance.delete(`playlist/${playlistId}/remove-problem`, {
+                data : {problemIds}
+            });
 
             toast.success("Problem removed from playlist");
 
@@ -94,7 +96,7 @@ export const usePlaylistStore = create( (set, get) =>({
             }
 
         } catch (error) {
-            console.log("Error removing problem from playlist");
+            console.log("Error removing problem from playlist", error);
             toast.error("failed to delete problems from playlist")
         } finally {
             set( {isLoading:false} )
@@ -107,7 +109,7 @@ export const usePlaylistStore = create( (set, get) =>({
             await axiosInstance.delete(`playlist/delete-playlist/${playlistId}`)
 
             set( (state)=>({
-                platlists: state.platlists.filter( (p)=> p.id !== playlistId)
+                playlists: state.playlists.filter( (p)=> p.id !== playlistId)
             }))
 
             toast.success("Playlist deleted successfully");

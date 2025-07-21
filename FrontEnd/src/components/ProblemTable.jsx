@@ -79,11 +79,8 @@ const ProblemTable = ({ problems }) => {
   };
 
   const handleSaveToPlaylist = (problemId) => {
-    console.log(problemId, " Problem saved to playlist");
     setSelectedPrblemId(problemId);
     setIsAddToPlaylistModelOpen(true);
-    // console.log(selectedProblemId);
-    
   };
 
   const handleCreatePlaylist = async (data) => {
@@ -189,12 +186,6 @@ const ProblemTable = ({ problems }) => {
                     <td>
                       <div className="flex flex-wrap gap-1">
                         {(problem.tags || []).map((tag, idx) => (
-                          // <span
-                          //   key={idx}
-                          //   className="badge badge-outline badge-accent text-xs font-bold"
-                          // >
-                          //   {tag}
-                          // </span>
                           <span
                             key={idx}
                             className="badge text-white bg-gradient-to-r from-purple-600 to-indigo-800"

@@ -12,6 +12,7 @@ import Layout from "./layout/Layout.jsx";
 import AdminRoute from "./components/AdminRoute.jsx";
 import AddProblem from "./page/AddProblem.jsx";
 import ProblemPage from "./page/ProblemPage.jsx";
+import ProfilePage from "./page/ProfilePage.jsx";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth, isSignedUp, logout } =
@@ -61,6 +62,11 @@ const App = () => {
             element={authUser ? <AddProblem /> : <Navigate to={"/"} />}
           />
         </Route>
+
+        <Route
+          path="/profile"
+          element={authUser ? <ProfilePage /> : <Navigate to={"/"} />}
+        />
       </Routes>
     </div>
   );
