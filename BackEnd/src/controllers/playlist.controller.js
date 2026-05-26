@@ -15,7 +15,7 @@ export const getAllListDetails = async(req, res) =>{
         })
 
         if(playlists.length==0){
-            res.status(404).json({
+            return res.status(404).json({
                 message:"No any Playlist found"
             })
         }
@@ -30,7 +30,7 @@ export const getAllListDetails = async(req, res) =>{
         
         return res.status(500).json({
             success:false,
-            error:"Error in Fetching Playlists"
+            message:"Error in Fetching Playlists"
         })
     }
 }

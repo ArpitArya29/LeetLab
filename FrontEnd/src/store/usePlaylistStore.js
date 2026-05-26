@@ -39,7 +39,8 @@ export const usePlaylistStore = create( (set, get) =>({
             set( {playlists: res.data.playlists} )
         } catch (error) {
             console.log("Error fetching playlist", error);
-            toast.error("Failed to fetch playlists")
+            if(error.response.status===500)
+                toast.error("Failed to fetch playlists")
         } finally{
             set( {isLoading:false} )
         }
