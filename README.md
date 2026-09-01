@@ -77,4 +77,4 @@ Docker Sandbox
 Execution Result
   │
   ▼
-Submission History```
+Submission History
